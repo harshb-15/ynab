@@ -20,7 +20,7 @@ class LandingPage extends StatelessWidget{
               Expanded(
                   child: ListView(
                     children: [
-                      Text("Fintracker", style: theme.textTheme.headlineLarge!.merge(TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),),
+                      Text("YNAB", style: theme.textTheme.headlineLarge!.merge(TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),),
                       const SizedBox(height: 15,),
                       Text("Easy method to manage your savings", style: theme.textTheme.headlineSmall!.merge(TextStyle(color: ColorHelper.lighten(theme.colorScheme.primary, 0.1), fontWeight: FontWeight.w500)),),
                       const SizedBox(height: 25,),
@@ -40,7 +40,7 @@ class LandingPage extends StatelessWidget{
                     ],
                   )
               ),
-              const Text("*Since this application is currently in beta, be prepared for UI changes and unexpected behaviours."),
+              // const Text("*Since this application is currently in beta, be prepared for UI changes and unexpected behaviours."),
               const SizedBox(height: 20,),
               Container(
                 alignment: Alignment.bottomRight,

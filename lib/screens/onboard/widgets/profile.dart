@@ -39,7 +39,7 @@ class _ProfileWidget extends State<ProfileWidget>{
                   Expanded(
                       child: ListView(
                         children: [
-                          Text("Hi! \nwelcome to Fintracker", style: theme.textTheme.headlineMedium!.apply(color: theme.colorScheme.primary, fontWeightDelta: 2),),
+                          Text("Hi! \nwelcome to YNAB", style: theme.textTheme.headlineMedium!.apply(color: theme.colorScheme.primary, fontWeightDelta: 2),),
                           const SizedBox(height: 15,),
                           Text("Please enter all details to continue.", style: theme.textTheme.bodyLarge!.apply(color: ColorHelper.darken(theme.textTheme.bodyLarge!.color!), fontWeightDelta: 1),),
                           const SizedBox(height: 30,),
