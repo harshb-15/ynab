@@ -51,6 +51,8 @@ dependencies:
   provider: ^6.0.5
   fl_chart: ^0.64.0
   ficonsax: ^0.0.3
+  flutter_sms_inbox: ^1.0.3
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
