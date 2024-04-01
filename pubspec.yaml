@@ -49,10 +49,14 @@ dependencies:
   shared_preferences: ^2.1.1
   currency_picker: ^2.0.16
   provider: ^6.0.5
-  fl_chart: ^0.64.0
+  fl_chart: ^0.67.0
   ficonsax: ^0.0.3
   flutter_sms_inbox: ^1.0.3
   permission_handler: ^11.3.1
+  # telephony: ^0.2.0
+  # readsms: ^0.0.2+2
+  http: ^1.2.0
+  # sms_advanced: ^1.1.0
 
 dev_dependencies:
   flutter_test:

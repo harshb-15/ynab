@@ -19,6 +19,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+// import 'package:telephony/telephony.dart' as Tele;
+// import 'package:readsms/readsms.dart';
 
 typedef OnCloseCallback = Function(Payment payment);
 final DateFormat formatter = DateFormat('dd/MM/yyyy hh:mm a');
@@ -171,7 +173,22 @@ class _PaymentForm extends State<PaymentForm> {
   @override
   Widget build(BuildContext context) {
     if (!_initialised) return const CircularProgressIndicator();
-
+    // Tele.Telephony telephony = Tele.Telephony.instance;
+    // telephony.listenIncomingSms(
+    //   onNewMessage: (Tele.SmsMessage message) {
+    //     print(message.address); //+977981******67, sender nubmer
+    //     print(message.body); //sms text
+    //     print(message.date); //1659690242000, timestamp
+    //   },
+    //   listenInBackground: false,
+    // );
+    // final plugin = Readsms();
+    // plugin.read();
+    // plugin.smsStream.listen((sms) {
+    //   print(sms.body);
+    //   print(sms.sender);
+    //   print(sms.timeReceived);
+    // });
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -708,7 +725,7 @@ class _PaymentForm extends State<PaymentForm> {
                             messages.sort((a, b) => a.compareTo(b));
                             SmsMessage sms = messages[0];
                             for (int i = 0; i < messages.length; i++) {
-                              if (messages[i].sender == "JK-SBIUPI") {
+                              if (messages[i].sender == "JK-SBIUPI" || messages[i].sender == "JD-SBIUPI") {
                                 sms = messages[i];
                                 break;
                               }
@@ -718,7 +735,7 @@ class _PaymentForm extends State<PaymentForm> {
                                 ? _type = PaymentType.debit
                                 : _type = PaymentType.credit;
                             _title = "UPI";
-                            _amount = double.parse(body.split(" ").toList()[7]);
+                            _amount = double.parse(body.contains("credited") ? body.split(" ").toList()[8].substring(2):body.split(" ").toList()[7]);
                             _account = _accounts[_accounts.length - 1];
                             _category = _categories[_categories.length - 1];
                             _datetime = sms.date!;
