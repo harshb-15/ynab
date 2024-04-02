@@ -10,6 +10,7 @@ import 'package:fintracker/model/payment.model.dart';
 import 'package:fintracker/providers/app_provider.dart';
 import 'package:fintracker/screens/home/widgets/account_slider.dart';
 import 'package:fintracker/screens/home/widgets/payment_list_item.dart';
+import 'package:fintracker/screens/ocr.dart';
 import 'package:fintracker/screens/payments/payment_form.screen.dart';
 import 'package:fintracker/screens/settings/settings.screen.dart';
 import 'package:fintracker/theme/colors.dart';
@@ -275,7 +276,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 )
             ),
-          )
+          ),
+          floatingActionButton: FloatingActionButton(
+          // heroTag: "payment-hero-fab",
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (builder) =>
+                     OCRPage()));
+          },
+          child: const Icon(Icons.scanner),
+        )
     );
   }
 }

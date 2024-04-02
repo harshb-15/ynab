@@ -65,12 +65,12 @@ class _GraphScreenState extends State<GraphScreen> {
 
     for (var payment in payments) {
       if (payment.datetime.year == lastYear) {
-        monthlyTotals[payment.datetime.month - 1] += payment.amount;
+        monthlyTotals[payment.datetime.month - 1] += payment.type==PaymentType.debit ? payment.amount:0;
       }
     }
 
     _lineChartSpots = List.generate(
-        12, (index) => FlSpot(index.toDouble(), monthlyTotals[index]));
+        12, (index) => FlSpot(index.toDouble()+1, monthlyTotals[index]));
 
     setState(() {});
   }
@@ -141,6 +141,7 @@ class _GraphScreenState extends State<GraphScreen> {
                             },
                           ),
                           startDegreeOffset: 180,
+                          // borderData: FlBorderData(border: Border.)
                           // animationDuration: Duration(milliseconds: 800),
                         ),
                           ),

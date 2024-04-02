@@ -725,7 +725,7 @@ class _PaymentForm extends State<PaymentForm> {
                             messages.sort((a, b) => a.compareTo(b));
                             SmsMessage sms = messages[0];
                             for (int i = 0; i < messages.length; i++) {
-                              if (messages[i].sender == "JK-SBIUPI" || messages[i].sender == "JD-SBIUPI") {
+                              if (messages[i].sender!.contains("SBIUPI")) {
                                 sms = messages[i];
                                 break;
                               }
