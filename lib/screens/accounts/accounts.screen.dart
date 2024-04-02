@@ -66,151 +66,160 @@ class _AccountsScreenState extends State<AccountsScreen> {
         appBar: AppBar(
           title: const Text("Accounts", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),),
         ),
-        body: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-            itemCount: _accounts.length,
-            itemBuilder: (builder, index){
-              Account account = _accounts[index];
-              GlobalKey accKey = GlobalKey();
-              return Stack(
-                children: [
-                  Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                      decoration: BoxDecoration(
-                          color: account.color.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(account.holderName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),),
-                                  Text(account.name, style: Theme.of(context).textTheme.bodySmall,),
-                                  Text(maskAccount(account.accountNumber), style: Theme.of(context).textTheme.bodySmall,),
-                                ],
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 20,),
-                          const Text.rich(
-                              TextSpan(
+        body: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              // _count = 0;
+              // _payments = [];
+            });
+            return loadData();
+          },
+          child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              itemCount: _accounts.length,
+              itemBuilder: (builder, index){
+                Account account = _accounts[index];
+                GlobalKey accKey = GlobalKey();
+                return Stack(
+                  children: [
+                    Container(
+                        margin: const EdgeInsets.only(bottom: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                        decoration: BoxDecoration(
+                            color: account.color.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextSpan(text:"Total Balance", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                                  ]
-                              )
-                          ),
-                          CurrencyText(account.balance??0, style:  TextStyle(fontSize: 20, fontWeight: FontWeight.w700, fontFamily: context.monoFontFamily),),
-                          const SizedBox(height: 10,),
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text.rich(
-                                          TextSpan(
-                                              children: [
-                                                //TextSpan(text: "▼", style: TextStyle(color: ThemeColors.success)),
-                                                TextSpan(text:"Income", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                                              ]
-                                          )
-                                      ),
-                                      CurrencyText(account.income??0, style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ThemeColors.success, fontFamily: context.monoFontFamily),)
-                                    ],
-                                  )
-                              ),
-                              Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text.rich(
-                                          TextSpan(
-                                              children: [
-                                                //TextSpan(text: "▲", style: TextStyle(color: ThemeColors.error)),
-                                                TextSpan(text:"Expense", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                                              ]
-                                          )
-                                      ),
-                                      CurrencyText(account.expense??0, style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ThemeColors.error, fontFamily: context.monoFontFamily),)
-
-                                    ],
-                                  )
-                              )
-                            ],
-                          )
-                        ],
-                      )
-                  ),
-                  Positioned(
-                      right: 15,
-                      bottom: 40,
-                      child: Icon(account.icon, size: 20, color: account.color,)
-                  ),
-
-                  Positioned(
-                      right: 0,
-                      top: 0,
-                    child:  IconButton(
-                        key: accKey,
-                        onPressed: (){
-                          final RenderBox renderBox =
-                          accKey.currentContext?.findRenderObject() as RenderBox;
-                          final Size size = renderBox.size;
-                          final Offset offset = renderBox.localToGlobal(Offset.zero);
-
-                          showMenu(
-                            context: context,
-                            position: RelativeRect.fromLTRB(
-                                offset.dx,
-                                offset.dy + size.height,
-                                offset.dx + size.width,
-                                offset.dy + size.height
+                                    Text(account.holderName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),),
+                                    Text(account.name, style: Theme.of(context).textTheme.bodySmall,),
+                                    Text(maskAccount(account.accountNumber), style: Theme.of(context).textTheme.bodySmall,),
+                                  ],
+                                )
+                              ],
                             ),
-                            items: [
-                              PopupMenuItem<String>(
-                                value: '1',
-                                child: const Text('Edit'),
-                                onTap: (){
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    showDialog(context: context, builder: (builder)=>AccountForm(account: account,));
-                                  });
-                                },
-                              ),
-                              PopupMenuItem<String>(
-                                value: '2',
-                                child: const Text('Delete', style: TextStyle(color: ThemeColors.error),),
-                                onTap: (){
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    ConfirmModal.showConfirmDialog(
-                                        context,
-                                        title: "Are you sure?",
-                                        content: const Text("All the paymentswill be deleted belongs to this account"),
-                                        onConfirm: () async {
-                                          Navigator.pop(context);
-                                          await _accountDao.delete(account.id!);
-                                          globalEvent.emit("account_update");
-                                        },
-                                        onCancel: (){
-                                          Navigator.pop(context);
-                                        }
-                                    );
-                                  });
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                        icon: const Icon(Icons.more_vert, size: 20,),
+                            const SizedBox(height: 20,),
+                            const Text.rich(
+                                TextSpan(
+                                    children: [
+                                      TextSpan(text:"Total Balance", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                    ]
+                                )
+                            ),
+                            CurrencyText(account.balance??0, style:  TextStyle(fontSize: 20, fontWeight: FontWeight.w700, fontFamily: context.monoFontFamily),),
+                            const SizedBox(height: 10,),
+                            Row(
+                              children: [
+                                Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text.rich(
+                                            TextSpan(
+                                                children: [
+                                                  //TextSpan(text: "▼", style: TextStyle(color: ThemeColors.success)),
+                                                  TextSpan(text:"Income", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                                ]
+                                            )
+                                        ),
+                                        CurrencyText(account.income??0, style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ThemeColors.success, fontFamily: context.monoFontFamily),)
+                                      ],
+                                    )
+                                ),
+                                Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text.rich(
+                                            TextSpan(
+                                                children: [
+                                                  //TextSpan(text: "▲", style: TextStyle(color: ThemeColors.error)),
+                                                  TextSpan(text:"Expense", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                                ]
+                                            )
+                                        ),
+                                        CurrencyText(account.expense??0, style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ThemeColors.error, fontFamily: context.monoFontFamily),)
+          
+                                      ],
+                                    )
+                                )
+                              ],
+                            )
+                          ],
+                        )
                     ),
-                  )
-                ],
-              );
-            }
+                    Positioned(
+                        right: 15,
+                        bottom: 40,
+                        child: Icon(account.icon, size: 20, color: account.color,)
+                    ),
+          
+                    Positioned(
+                        right: 0,
+                        top: 0,
+                      child:  IconButton(
+                          key: accKey,
+                          onPressed: (){
+                            final RenderBox renderBox =
+                            accKey.currentContext?.findRenderObject() as RenderBox;
+                            final Size size = renderBox.size;
+                            final Offset offset = renderBox.localToGlobal(Offset.zero);
+          
+                            showMenu(
+                              context: context,
+                              position: RelativeRect.fromLTRB(
+                                  offset.dx,
+                                  offset.dy + size.height,
+                                  offset.dx + size.width,
+                                  offset.dy + size.height
+                              ),
+                              items: [
+                                PopupMenuItem<String>(
+                                  value: '1',
+                                  child: const Text('Edit'),
+                                  onTap: (){
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      showDialog(context: context, builder: (builder)=>AccountForm(account: account,));
+                                    });
+                                  },
+                                ),
+                                PopupMenuItem<String>(
+                                  value: '2',
+                                  child: const Text('Delete', style: TextStyle(color: ThemeColors.error),),
+                                  onTap: (){
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      ConfirmModal.showConfirmDialog(
+                                          context,
+                                          title: "Are you sure?",
+                                          content: const Text("All the paymentswill be deleted belongs to this account"),
+                                          onConfirm: () async {
+                                            Navigator.pop(context);
+                                            await _accountDao.delete(account.id!);
+                                            globalEvent.emit("account_update");
+                                          },
+                                          onCancel: (){
+                                            Navigator.pop(context);
+                                          }
+                                      );
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                          icon: const Icon(Icons.more_vert, size: 20,),
+                      ),
+                    )
+                  ],
+                );
+              }
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           heroTag: "account-hero-fab",

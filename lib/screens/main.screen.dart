@@ -1,10 +1,14 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:ficonsax/ficonsax.dart';
 import 'package:fintracker/extension.dart';
 import 'package:fintracker/providers/app_provider.dart';
 import 'package:fintracker/screens/accounts/accounts.screen.dart';
 import 'package:fintracker/screens/categories/categories.screen.dart';
+import 'package:fintracker/screens/graph/graph.dart';
 import 'package:fintracker/screens/home/home.screen.dart';
 import 'package:fintracker/screens/onboard/onboard_screen.dart';
 import 'package:fintracker/screens/payments/payments_screen.dart';
@@ -12,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:fintracker/screens/graph/graph.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -49,6 +54,11 @@ class _MainScreenState extends State<MainScreen> {
         "iconSelected": IconsaxBold.category,
         "label": "Categories"
       },
+      {
+        "icon": IconsaxOutline.graph,
+        "iconSelected": IconsaxBold.graph,
+        "label": "Chart"
+      },
     ];
     // int comp(SmsMessage a, SmsMessage b) {
     //   return a.date! < b.date!;
@@ -68,11 +78,13 @@ class _MainScreenState extends State<MainScreen> {
             Expanded(
                 child: IndexedStack(
               index: _selected,
-              children: const [
+              children: [
                 HomeScreen(),
                 PaymentsScreen(),
                 AccountsScreen(),
                 CategoriesScreen(),
+                GraphScreen()
+                // GraphScreen(),
               ],
             )),
             Container(
