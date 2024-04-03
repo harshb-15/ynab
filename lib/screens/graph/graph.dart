@@ -1,4 +1,6 @@
+import 'package:events_emitter/listener.dart';
 import 'package:fintracker/dao/payment_dao.dart';
+import 'package:fintracker/events.dart';
 import 'package:fintracker/model/payment.model.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -11,6 +13,7 @@ class GraphScreen extends StatefulWidget {
 
 class _GraphScreenState extends State<GraphScreen> {
   int touchedIndex = -1;
+  // EventListener? _paymentEventListener;
   final PaymentDao _paymentDao = PaymentDao();
   List<PieChartSectionData> _pieChartSections = [];
   List<FlSpot> _lineChartSpots = [];
@@ -19,6 +22,13 @@ class _GraphScreenState extends State<GraphScreen> {
   void initState() {
     super.initState();
     _loadData();
+    // _paymentEventListener = globalEvent.on("payment_update", (data) {
+    //   debugPrint("payments are changed");
+
+    //   setState(() {
+    //     _loadData();
+    //   });
+    // });
   }
 
   void _loadData() async {
@@ -65,12 +75,13 @@ class _GraphScreenState extends State<GraphScreen> {
 
     for (var payment in payments) {
       if (payment.datetime.year == lastYear) {
-        monthlyTotals[payment.datetime.month - 1] += payment.type==PaymentType.debit ? payment.amount:0;
+        monthlyTotals[payment.datetime.month - 1] +=
+            payment.type == PaymentType.debit ? payment.amount : 0;
       }
     }
 
     _lineChartSpots = List.generate(
-        12, (index) => FlSpot(index.toDouble()+1, monthlyTotals[index]));
+        12, (index) => FlSpot(index.toDouble() + 1, monthlyTotals[index]));
 
     setState(() {});
   }
@@ -83,120 +94,145 @@ class _GraphScreenState extends State<GraphScreen> {
             Text('Financial Overview', style: TextStyle(color: Colors.white)),
         // backgroundColor: Colors.deepPurple, // Change the color of AppBar
       ),
-      body: SingleChildScrollView(
-        // Use SingleChildScrollView to avoid overflow when keyboard appears
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Transaction Insights',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple, // Heading color
+      body: RefreshIndicator(
+        onRefresh: () async {
+          _loadData();
+        },
+        child: SingleChildScrollView(
+          // Use SingleChildScrollView to avoid overflow when keyboard appears
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Transaction Insights',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple, // Heading color
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'Transactions by Category',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Card(
+                  elevation: 2, // Reduced elevation for a lighter shadow
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(12), // Adjusted border radius
+                  ),
+                  child: Column(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center, // Center the content
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'Transactions by Category',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 200, // Adjust the size of the pie chart container
-                      child: PieChart(
+                      SizedBox(
+                        height: 300, // Adjusted size of the pie chart container
+                        child: PieChart(
                           PieChartData(
-                          sections: _pieChartSections,
-                          centerSpaceRadius: 40,
-                          sectionsSpace: 2,
-                          pieTouchData: PieTouchData(
-                            touchCallback: (FlTouchEvent event,
-                                PieTouchResponse? response) {
-                              setState(() {
-                                if (!event.isInterestedForInteractions ||
-                                    response == null ||
-                                    response.touchedSection == null) {
-                                  touchedIndex = -1;
-                                  return;
-                                }
-                                touchedIndex = response
-                                    .touchedSection!.touchedSectionIndex;
-                              });
-                            },
+                            centerSpaceRadius: 40,
+                            sectionsSpace: 2,
+                            pieTouchData: PieTouchData(
+                              touchCallback: (FlTouchEvent event,
+                                  PieTouchResponse? response) {
+                                setState(() {
+                                  if (!event.isInterestedForInteractions ||
+                                      response == null ||
+                                      response.touchedSection == null) {
+                                    touchedIndex = -1;
+                                    return;
+                                  }
+                                  touchedIndex = response
+                                      .touchedSection!.touchedSectionIndex;
+                                });
+                              },
+                            ),
+                            startDegreeOffset: 180,
+                            sections: _pieChartSections.map((section) {
+                              final isTouched =
+                                  _pieChartSections.indexOf(section) ==
+                                      touchedIndex;
+                              final double fontSize = isTouched ? 16.0 : 14.0;
+                              final double radius = isTouched ? 80.0 : 70.0;
+
+                              return section.copyWith(
+                                titlePositionPercentageOffset:
+                                    1.5, // Adjust label position
+                                radius: radius,
+                                titleStyle: TextStyle(
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors
+                                      .white, // Label text color changed to white
+                                ),
+                              );
+                            }).toList(),
                           ),
-                          startDegreeOffset: 180,
-                          // borderData: FlBorderData(border: Border.)
-                          // animationDuration: Duration(milliseconds: 800),
-                        ),
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'Monthly Transactions (Previous Year)',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      height:
-                          200, // Adjust the size of the line chart container
-                      child: LineChart(
-                          LineChartData(
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: _lineChartSpots,
-                              isCurved: true,
-                              // colors: [Colors.blue],
-                              barWidth: 4,
-                              isStrokeCapRound: true,
-                              dotData: FlDotData(show: false),
-                              belowBarData: BarAreaData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(show: true),
-                          borderData: FlBorderData(show: false),
-                          gridData: FlGridData(show: false),
-                        ),
-                          ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'Monthly Transactions (Previous Year)',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height:
+                            200, // Adjust the size of the line chart container
+                        child: LineChart(
+                          LineChartData(
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: _lineChartSpots,
+                                isCurved: true,
+                                // colors: [Colors.blue],
+                                barWidth: 4,
+                                isStrokeCapRound: true,
+                                dotData: FlDotData(show: false),
+                                belowBarData: BarAreaData(show: false),
+                              ),
+                            ],
+                            titlesData: FlTitlesData(show: true),
+                            borderData: FlBorderData(show: false),
+                            gridData: FlGridData(show: false),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

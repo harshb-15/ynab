@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'dart:async';
-import 'dart:ffi';
 
 import 'package:ficonsax/ficonsax.dart';
 import 'package:fintracker/extension.dart';
@@ -13,10 +11,7 @@ import 'package:fintracker/screens/home/home.screen.dart';
 import 'package:fintracker/screens/onboard/onboard_screen.dart';
 import 'package:fintracker/screens/payments/payments_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:fintracker/screens/graph/graph.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
